@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kalkulator Harga Jual</title>
+<style>
+body{font-family:Arial;background:#f3f6fb;padding:20px}
+.box{max-width:900px;margin:auto;background:white;padding:25px;border-radius:12px}
+.tabs button{padding:12px;border:0;border-radius:8px;margin-right:8px;cursor:pointer}
+.active{background:#2563eb;color:white}
+.sheet{display:none}.show{display:block}
+table{width:100%;border-collapse:collapse}
+td{padding:8px;border-bottom:1px solid #ddd}
+input{width:180px;padding:7px;background:#dff2ff;border:1px solid #aaa}
+.result{background:#fafafa}
+.title{font-weight:bold;background:#e8f0ff}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>📊 KALKULATOR ANALISIS HARGA JUAL</h2>
+
+<div class="tabs">
+<button class="active" onclick="tab(1,this)">Analisis Harga Jual</button>
+<button onclick="tab(2,this)">Harga Jual Target</button>
+</div>
+
+<div id="s1" class="sheet show">
+<table>
+<tr><td colspan="2" class="title">A. INPUT HARGA & BIAYA</td></tr>
+<tr><td>Harga Beli Barang (Modal)</td><td><input id="c9" value="25000"></td></tr>
+<tr><td>Harga Jual</td><td><input id="c10" value="35000"></td></tr>
+<tr><td>Biaya Admin (%)</td><td><input id="c11" value="0.1825"></td></tr>
+<tr><td>Biaya Proses Pesanan (Rp)</td><td><input id="c12" value="1250"></td></tr>
+<tr><td>Pajak (%)</td><td><input id="c13" value="0.005"></td></tr>
+<tr><td>Biaya Variabel (Rp)</td><td><input id="c14" value="2000"></td></tr>
+<tr><td>Biaya Tetap (Rp)</td><td><input id="c15" value="1000"></td></tr>
+
+<tr><td colspan="2" class="title">B. KALKULASI PENDAPATAN BERSIH</td></tr>
+<tr><td>Harga Jual</td><td id="r18"></td></tr>
+<tr><td>(-) Biaya Admin</td><td id="r19"></td></tr>
+<tr><td>Pendapatan setelah Admin</td><td id="r20"></td></tr>
+<tr><td>(-) Biaya Proses</td><td id="r21"></td></tr>
+<tr><td>Pendapatan setelah Proses</td><td id="r22"></td></tr>
+<tr><td>(-) Pajak</td><td id="r23"></td></tr>
+<tr><td>Pendapatan Bersih</td><td id="r24"></td></tr>
+
+<tr><td colspan="2" class="title">C. BIAYA TOTAL & MARGIN</td></tr>
+<tr><td>Total Biaya</td><td id="r27"></td></tr>
+<tr><td>Laba Kotor</td><td id="r28"></td></tr>
+<tr><td>Margin (%)</td><td id="r29"></td></tr>
+
+<tr><td colspan="2" class="title">D. RINGKASAN</td></tr>
+<tr><td>Harga Jual</td><td id="r32"></td></tr>
+<tr><td>Total Biaya</td><td id="r33"></td></tr>
+<tr><td>Pendapatan Bersih</td><td id="r34"></td></tr>
+<tr><td>Laba Bersih</td><td id="r35"></td></tr>
+<tr><td>Margin Bersih (%)</td><td id="r36"></td></tr>
+</table>
+</div>
+
+
+<div id="s2" class="sheet">
+<table>
+<tr><td colspan="2" class="title">A. INPUT</td></tr>
+<tr><td>Harga Beli Barang</td><td><input id="t9" value="25000"></td></tr>
+<tr><td>Biaya Admin</td><td><input id="t10" value="0.1825"></td></tr>
+<tr><td>Biaya Proses</td><td><input id="t11" value="1250"></td></tr>
+<tr><td>Pajak</td><td><input id="t12" value="0.005"></td></tr>
+<tr><td>Biaya Variabel</td><td><input id="t13" value="2000"></td></tr>
+<tr><td>Biaya Tetap</td><td><input id="t14" value="1000"></td></tr>
+<tr><td>Target Margin</td><td><input id="t15" value="0.1"></td></tr>
+
+<tr><td>Total Biaya</td><td id="t18"></td></tr>
+<tr><td>Harga Jual Target</td><td id="t19"></td></tr>
+<tr><td>Pendapatan Bersih</td><td id="t28"></td></tr>
+<tr><td>Laba Bersih</td><td id="t30"></td></tr>
+<tr><td>Margin Aktual</td><td id="t31"></td></tr>
+<tr><td>Selisih Margin</td><td id="t32"></td></tr>
+</table>
+</div>
+
+</div>
+
+<script>
+const rp=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(n);
+const v=id=>Number(document.getElementById(id).value);
+
+function calc(){
+let modal=v('c9'), jual=v('c10'), admin=v('c11'), proses=v('c12'), pajak=v('c13'), variabel=v('c14'), tetap=v('c15');
+let biaya=modal+variabel+tetap;
+let bersih=(jual*(1-admin)-proses)*(1-pajak);
+let laba=bersih-biaya;
+let margin=laba/jual;
+
+[['r18',jual],['r19',jual*admin],['r20',jual*(1-admin)],['r21',proses],['r22',jual*(1-admin)-proses],['r23',(jual*(1-admin)-proses)*pajak],['r24',bersih],['r27',biaya],['r28',laba],['r32',jual],['r33',biaya],['r34',bersih],['r35',laba]]
+.forEach(x=>document.getElementById(x[0]).innerHTML=rp(x[1]));
+document.getElementById('r29').innerHTML=(margin*100).toFixed(2)+'%';
+document.getElementById('r36').innerHTML=(margin*100).toFixed(2)+'%';
+
+let m=v('t9'), a=v('t10'), p=v('t11'), tax=v('t12'), va=v('t13'), fi=v('t14'), target=v('t15');
+let total=m+va+fi;
+let hj=(p*(1-tax)+total)/((1-a)*(1-tax)-target);
+let pb=(hj*(1-a)-p)*(1-tax);
+let lb=pb-total;
+let ma=lb/hj;
+[['t18',total],['t19',hj],['t28',pb],['t30',lb]]
+.forEach(x=>document.getElementById(x[0]).innerHTML=rp(x[1]));
+document.getElementById('t31').innerHTML=(ma*100).toFixed(2)+'%';
+document.getElementById('t32').innerHTML=((ma-target)*100).toFixed(2)+'%';
+}
+document.querySelectorAll('input').forEach(i=>i.oninput=calc);
+function tab(n,b){document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('show'));document.getElementById('s'+n).classList.add('show');document.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
+calc();
+</script>
+</body>
+</html>
