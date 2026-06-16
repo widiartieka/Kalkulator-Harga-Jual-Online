@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Harga Jual</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f7fb;margin:0;padding:20px}
+.container{max-width:900px;margin:auto;background:white;padding:25px;border-radius:15px;box-shadow:0 4px 15px #ccc}
+h1{text-align:center}
+.section{margin-top:25px;font-weight:bold;background:#eaf2ff;padding:10px;border-radius:8px}
+.row{display:grid;grid-template-columns:1fr 200px;gap:10px;margin:8px 0}
+input{padding:8px;border-radius:6px;border:1px solid #aaa}
+input.input{background:#d9efff}
+.result{background:#fafafa}
+.money{font-weight:bold}
+.card{background:#f8f8f8;padding:15px;border-radius:10px;margin-top:15px}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>📊 Kalkulator Harga Jual</h1>
+
+<div class="section">A. Input Harga & Biaya</div>
+<div class="row">Harga Beli Barang (Modal)<input id="modal" class="input" value="25000"></div>
+<div class="row">Harga Jual<input id="jual" class="input" value="35000"></div>
+<div class="row">Biaya Admin (%)<input id="admin" class="input" value="18.25"></div>
+<div class="row">Biaya Proses Pesanan<input id="proses" class="input" value="1250"></div>
+<div class="row">Pajak (%)<input id="pajak" class="input" value="0.5"></div>
+<div class="row">Biaya Variabel<input id="variabel" class="input" value="2000"></div>
+<div class="row">Biaya Tetap<input id="tetap" class="input" value="1000"></div>
+
+<div class="section">B. Hasil Kalkulasi</div>
+<div id="hasil"></div>
+
+<div class="section">🎯 Harga Jual Target</div>
+<div class="row">Target Margin (%)<input id="target" class="input" value="10"></div>
+<div id="targetHasil"></div>
+
+</div>
+
+<script>
+function rupiah(n){
+ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).format(n);
+}
+
+function hitung(){
+ let modal=+modalInput.value;
+ let jual=+jualInput.value;
+ let admin=+adminInput.value/100;
+ let proses=+prosesInput.value;
+ let pajak=+pajakInput.value/100;
+ let variabel=+variabelInput.value;
+ let tetap=+tetapInput.value;
+ let target=+targetInput.value/100;
+
+ let setelahAdmin=jual*(1-admin);
+ let setelahProses=setelahAdmin-proses;
+ let bersih=setelahProses*(1-pajak);
+ let biaya=modal+variabel+tetap;
+ let laba=bersih-biaya;
+ let margin=laba/jual*100;
+
+ hasil.innerHTML=`
+<div class="card">
+Harga Jual: <b>${rupiah(jual)}</b><br>
+Pendapatan Bersih: <b>${rupiah(bersih)}</b><br>
+Total Biaya: <b>${rupiah(biaya)}</b><br>
+Laba Bersih: <b>${rupiah(laba)}</b><br>
+Margin Bersih: <b>${margin.toFixed(2)}%</b>
+</div>`;
+
+ let hargaTarget=(proses*(1-pajak)+biaya)/((1-admin)*(1-pajak)-target);
+ let labaTarget=(hargaTarget*(1-admin)-proses)*(1-pajak)-biaya;
+ let marginTarget=labaTarget/hargaTarget*100;
+
+ targetHasil.innerHTML=`
+<div class="card">
+Harga Jual Target: <b>${rupiah(hargaTarget)}</b><br>
+Laba Bersih: <b>${rupiah(labaTarget)}</b><br>
+Margin Aktual: <b>${marginTarget.toFixed(2)}%</b>
+</div>`;
+}
+
+let modalInput=document.getElementById('modal');
+let jualInput=document.getElementById('jual');
+let adminInput=document.getElementById('admin');
+let prosesInput=document.getElementById('proses');
+let pajakInput=document.getElementById('pajak');
+let variabelInput=document.getElementById('variabel');
+let tetapInput=document.getElementById('tetap');
+let targetInput=document.getElementById('target');
+
+document.querySelectorAll("input").forEach(x=>x.addEventListener("input",hitung));
+hitung();
+</script>
+
+</body>
+</html>
