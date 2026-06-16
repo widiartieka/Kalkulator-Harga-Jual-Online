@@ -69,7 +69,7 @@ input{width:180px;padding:7px;background:#dff2ff;border:1px solid #aaa}
 <tr><td>Pajak</td><td><input id="t12" value="0.5"></td></tr>
 <tr><td>Biaya Variabel</td><td><input id="t13" value="2000"></td></tr>
 <tr><td>Biaya Tetap</td><td><input id="t14" value="1000"></td></tr>
-<tr><td>Target Margin</td><td><input id="t15" value="0.1"></td></tr>
+<tr><td>Target Margin</td><td><input id="t15" value="10"></td></tr>
 
 <tr><td>Total Biaya</td><td id="t18"></td></tr>
 <tr><td>Harga Jual Target</td><td id="t19"></td></tr>
@@ -98,7 +98,7 @@ let margin=laba/jual;
 document.getElementById('r29').innerHTML=(margin*100).toFixed(2)+'%';
 document.getElementById('r36').innerHTML=(margin*100).toFixed(2)+'%';
 
-let m=v('t9'), a=v('t10'), p=v('t11'), tax=v('t12'), va=v('t13'), fi=v('t14'), target=v('t15');
+let m=v('t9'), a=v('t10'), p=v('t11'), tax=v('t12'), va=v('t13'), fi=v('t14'), target=v('t15')/100;
 let total=m+va+fi;
 let hj=(p*(1-tax)+total)/((1-a)*(1-tax)-target);
 let pb=(hj*(1-a)-p)*(1-tax);
