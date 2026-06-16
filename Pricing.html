@@ -87,7 +87,7 @@ const rp=n=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR'}).for
 const v=id=>Number(document.getElementById(id).value);
 
 function calc(){
-let modal=v('c9'), jual=v('c10'), admin=v('c11'), proses=v('c12'), pajak=v('c13'), variabel=v('c14'), tetap=v('c15');
+let modal=v('c9'), jual=v('c10'), admin=v('c11')/100, proses=v('c12'), pajak=v('c13')/100, variabel=v('c14'), tetap=v('c15');
 let biaya=modal+variabel+tetap;
 let bersih=(jual*(1-admin)-proses)*(1-pajak);
 let laba=bersih-biaya;
