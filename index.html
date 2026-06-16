@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Harga Jual Marketplace</title>
+<style>
+body{font-family:Arial;background:#f4f6f9;padding:20px;margin:0}
+.container{max-width:800px;margin:auto;background:#fff;padding:25px;border-radius:15px;box-shadow:0 0 15px rgba(0,0,0,.1)}
+.section{margin-bottom:30px;padding:20px;border:1px solid #ddd;border-radius:12px}
+h1,h2{text-align:center;color:#0f766e}
+label{display:block;font-weight:bold;margin-top:10px}
+input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+button{width:100%;padding:12px;margin-top:15px;border:none;border-radius:8px;background:#16a34a;color:white;font-size:16px;cursor:pointer}
+.reset{background:#dc2626}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+td{padding:8px;border-bottom:1px solid #ddd}
+.total{font-size:22px;font-weight:bold;color:#16a34a}
+.laba{font-weight:bold;color:#2563eb}
+.hasil{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Kalkulator Harga Jual Marketplace</h1>
+
+<div class="section">
+<h2>Section 1 - Hitung Harga Jual</h2>
+
+<label>Harga Modal</label><input type="number" id="modal">
+<label>Biaya Variabel</label><input type="number" id="variabel" value="2000">
+<label>Biaya Tetap</label><input type="number" id="tetap" value="1000">
+<label>Biaya Proses Pesanan</label><input type="number" id="proses" value="1250">
+<label>Biaya Admin Marketplace (%)</label><input type="number" id="admin" value="18.25" step="0.01">
+<label>Pajak (%)</label><input type="number" id="pajak" value="0.5" step="0.01">
+<label>Margin yang Diinginkan (%)</label><input type="number" id="margin" value="10" step="0.01">
+
+<button onclick="hitung()">Hitung Harga Jual</button>
+
+<div class="hasil" id="hasil1">
+<table>
+<tr><td>HPP Dasar</td><td id="hpp1"></td></tr>
+<tr><td>Biaya Admin</td><td id="admin1"></td></tr>
+<tr><td>Pajak</td><td id="pajak1"></td></tr>
+<tr><td>Total Biaya Penjualan</td><td id="total1"></td></tr>
+<tr><td>Laba Bersih per Produk</td><td class="laba" id="laba1"></td></tr>
+<tr><td>Margin terhadap Harga Jual</td><td id="margin1"></td></tr>
+<tr><td>ROI terhadap Modal</td><td id="roi1"></td></tr>
+<tr><td>Harga Jual Disarankan</td><td class="total" id="jual1"></td></tr>
+</table>
+</div>
+</div>
+
+<div class="section">
+<h2>Section 2 - Analisis Harga Jual</h2>
+
+<label>Harga Jual</label><input type="number" id="hargaJualAnalisis">
+
+<button onclick="analisis()">Hitung Laba Bersih</button>
+<button class="reset" onclick="resetForm()">Reset</button>
+
+<div class="hasil" id="hasil2">
+<table>
+<tr><td>HPP Dasar</td><td id="hpp2"></td></tr>
+<tr><td>Biaya Admin</td><td id="admin2"></td></tr>
+<tr><td>Pajak</td><td id="pajak2"></td></tr>
+<tr><td>Total Biaya Penjualan</td><td id="total2"></td></tr>
+<tr><td>Laba Bersih</td><td class="laba" id="laba2"></td></tr>
+<tr><td>Margin terhadap Harga Jual</td><td id="margin2"></td></tr>
+<tr><td>ROI terhadap Modal</td><td id="roi2"></td></tr>
+</table>
+</div>
+</div>
+</div>
+
+<script>
+function rupiah(x){return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(x)}
+
+function getData(){
+ return {
+  modal:+document.getElementById('modal').value||0,
+  variabel:+document.getElementById('variabel').value||0,
+  tetap:+document.getElementById('tetap').value||0,
+  proses:+document.getElementById('proses').value||0,
+  admin:(+document.getElementById('admin').value||0)/100,
+  pajak:(+document.getElementById('pajak').value||0)/100,
+  margin:(+document.getElementById('margin').value||0)/100
+ };
+}
+
+function hitung(){
+ let d=getData();
+ let hpp=d.modal+d.variabel+d.tetap+d.proses;
+ let jual=hpp/(1-(d.admin+d.pajak+d.margin));
+ let adm=jual*d.admin;
+ let paj=jual*d.pajak;
+ let laba=jual-hpp-adm-paj;
+ let total=hpp+adm+paj;
+ let margin=(laba/jual)*100;
+ let roi=(laba/hpp)*100;
+
+ document.getElementById('hpp1').innerHTML=rupiah(hpp);
+ document.getElementById('admin1').innerHTML=rupiah(adm);
+ document.getElementById('pajak1').innerHTML=rupiah(paj);
+ document.getElementById('total1').innerHTML=rupiah(total);
+ document.getElementById('laba1').innerHTML=rupiah(laba);
+ document.getElementById('margin1').innerHTML=margin.toFixed(2)+'%';
+ document.getElementById('roi1').innerHTML=roi.toFixed(2)+'%';
+ document.getElementById('jual1').innerHTML=rupiah(jual);
+ document.getElementById('hasil1').style.display='block';
+}
+
+function analisis(){
+ let d=getData();
+ let jual=+document.getElementById('hargaJualAnalisis').value||0;
+ let hpp=d.modal+d.variabel+d.tetap+d.proses;
+ let adm=jual*d.admin;
+ let paj=jual*d.pajak;
+ let total=hpp+adm+paj;
+ let laba=jual-total;
+ let margin=(laba/jual)*100;
+ let roi=(laba/hpp)*100;
+
+ document.getElementById('hpp2').innerHTML=rupiah(hpp);
+ document.getElementById('admin2').innerHTML=rupiah(adm);
+ document.getElementById('pajak2').innerHTML=rupiah(paj);
+ document.getElementById('total2').innerHTML=rupiah(total);
+ document.getElementById('laba2').innerHTML=rupiah(laba);
+ document.getElementById('margin2').innerHTML=margin.toFixed(2)+'%';
+ document.getElementById('roi2').innerHTML=roi.toFixed(2)+'%';
+ document.getElementById('hasil2').style.display='block';
+}
+
+function resetForm(){
+ document.querySelectorAll('input').forEach(i=>{if(i.id=='variabel')i.value=2000; else if(i.id=='tetap')i.value=1000; else if(i.id=='proses')i.value=1250; else if(i.id=='admin')i.value=18.25; else if(i.id=='pajak')i.value=0.5; else if(i.id=='margin')i.value=10; else i.value='';});
+ document.getElementById('hasil1').style.display='none';
+ document.getElementById('hasil2').style.display='none';
+}
+</script>
+</body>
+</html>
