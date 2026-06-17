@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Harga Jual</title>
+<style>
+  :root {
+    --navy: #1F4E79;
+    --navy-light: #2E6FAD;
+    --blue-pale: #D6E4F0;
+    --green-pale: #E2EFDA;
+    --yellow: #FFF2CC;
+    --amber: #E6B800;
+    --text: #1a1a2e;
+    --text-muted: #5a6478;
+    --border: #cdd5e0;
+    --bg: #f4f7fb;
+    --white: #ffffff;
+    --red: #c0392b;
+    --green: #1a7a4a;
+    --radius: 10px;
+    --shadow: 0 2px 12px rgba(31,78,121,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 1.5rem 2rem 1.2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  header svg { opacity: 0.9; }
+  header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; }
+  header p { font-size: 0.82rem; opacity: 0.7; margin-top: 2px; }
+
+  .tabs {
+    background: var(--navy);
+    display: flex; gap: 0;
+    padding: 0 2rem;
+    border-bottom: 2px solid rgba(255,255,255,0.08);
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.88rem; font-weight: 600;
+    padding: 0.75rem 1.4rem;
+    border-bottom: 3px solid transparent;
+    transition: all 0.18s;
+    letter-spacing: 0.01em;
+  }
+  .tab-btn.active { color: #fff; border-bottom-color: #60b4ff; }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.85); }
+
+  .main { max-width: 780px; margin: 2rem auto; padding: 0 1.2rem 3rem; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 1.4rem;
+    overflow: hidden;
+  }
+  .card-head {
+    background: var(--navy);
+    color: #fff;
+    padding: 0.7rem 1.2rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .card-body { padding: 1.2rem 1.4rem; }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #eef2f7;
+  }
+  .field-row:last-child { border-bottom: none; }
+  .field-label {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+  .field-label.bold { color: var(--text); font-weight: 600; }
+  .field-input {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field-input .prefix, .field-input .suffix {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    min-width: 20px;
+  }
+  input[type=number] {
+    width: 130px;
+    padding: 5px 8px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1F4E79;
+    background: var(--yellow);
+    text-align: right;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=number]:focus { border-color: var(--navy-light); background: #fff; }
+
+  .result-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.48rem 0;
+    border-bottom: 1px dashed #e8eef5;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row.highlight {
+    background: var(--green-pale);
+    margin: 0 -1.4rem;
+    padding: 0.6rem 1.4rem;
+    border-bottom: none;
+    border-radius: 6px;
+  }
+  .result-row.deduct { }
+  .result-label { font-size: 0.87rem; color: var(--text-muted); }
+  .result-label.bold { font-weight: 700; color: var(--text); }
+  .result-val {
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-align: right;
+    min-width: 110px;
+    color: var(--text);
+  }
+  .result-val.red { color: var(--red); }
+  .result-val.green { color: var(--green); }
+  .result-val.navy { color: var(--navy); }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .metric {
+    background: var(--blue-pale);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    text-align: center;
+  }
+  .metric.profit { background: var(--green-pale); }
+  .metric.warn { background: #fff3cd; }
+  .metric label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .metric.profit label { color: #1a5c35; }
+  .metric.warn label { color: #856404; }
+  .metric span {
+    display: block;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--navy);
+  }
+  .metric.profit span { color: var(--green); }
+  .metric.warn span { color: #856404; }
+
+  .info-box {
+    background: var(--blue-pale);
+    border-left: 4px solid var(--navy);
+    border-radius: 0 6px 6px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.83rem;
+    color: #1a3a5c;
+    line-height: 1.55;
+    margin-top: 0.5rem;
+  }
+  .info-box code {
+    background: rgba(31,78,121,0.1);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.82rem;
+    font-family: monospace;
+  }
+
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.8rem 0;
+  }
+
+  @media(max-width: 540px) {
+    header { padding: 1rem 1rem 0.9rem; }
+    header h1 { font-size: 1.1rem; }
+    .tabs { padding: 0 0.5rem; }
+    .tab-btn { font-size: 0.78rem; padding: 0.65rem 0.9rem; }
+    .summary-grid { grid-template-columns: 1fr; }
+    input[type=number] { width: 110px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+    <rect width="36" height="36" rx="9" fill="rgba(255,255,255,0.12)"/>
+    <path d="M9 27L15 18L21 23L27 12" stroke="#60b4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="27" cy="12" r="2.5" fill="#60b4ff"/>
+    <path d="M9 9v18M9 27h18" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" stroke-linecap="round"/>
+  </svg>
+  <div>
+    <h1>Kalkulator Harga Jual</h1>
+    <p>Analisis margin &amp; harga jual target secara instan</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('analisis')">&#9654; Analisis Harga Jual</button>
+  <button class="tab-btn" onclick="switchTab('target')">&#9654; Harga Jual Target</button>
+</div>
+
+<!-- ═══════════════════════ PANEL 1 ═══════════════════════ -->
+<div class="main">
+<div id="panel-analisis" class="panel active">
+
+  <div class="card">
+    <div class="card-head">A. Input Harga &amp; Biaya</div>
+    <div class="card-body">
+
+      <div class="field-row">
+        <span class="field-label">Harga Beli Barang (Modal)</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="a_modal" value="25000" min="0" oninput="calcAnalisis()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Harga Jual</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="a_jual" value="35000" min="0" oninput="calcAnalisis()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Admin</span>
+        <div class="field-input">
+          <input type="number" id="a_admin" value="18.25" min="0" max="100" step="0.01" oninput="calcAnalisis()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Proses Pesanan</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="a_proses" value="1250" min="0" oninput="calcAnalisis()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Pajak</span>
+        <div class="field-input">
+          <input type="number" id="a_pajak" value="0.5" min="0" max="100" step="0.01" oninput="calcAnalisis()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Variabel</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="a_var" value="2000" min="0" oninput="calcAnalisis()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Tetap</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="a_tetap" value="1000" min="0" oninput="calcAnalisis()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">B. Rincian Potongan Platform</div>
+    <div class="card-body">
+      <div class="result-row">
+        <span class="result-label">Harga Jual</span>
+        <span class="result-val navy" id="r_jual">Rp 35.000</span>
+      </div>
+      <div class="result-row deduct">
+        <span class="result-label">(−) Biaya Admin (<span id="r_admin_pct">18,25%</span>)</span>
+        <span class="result-val red" id="r_admin_nom">−Rp 6.388</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Setelah Admin</span>
+        <span class="result-val navy" id="r_after_admin">Rp 28.613</span>
+      </div>
+      <div class="result-row deduct">
+        <span class="result-label">(−) Biaya Proses Pesanan</span>
+        <span class="result-val red" id="r_proses_nom">−Rp 1.250</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Setelah Biaya Proses</span>
+        <span class="result-val navy" id="r_after_proses">Rp 27.363</span>
+      </div>
+      <div class="result-row deduct">
+        <span class="result-label">(−) Pajak (<span id="r_pajak_pct">0,5%</span>)</span>
+        <span class="result-val red" id="r_pajak_nom">−Rp 137</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Pendapatan Bersih</span>
+        <span class="result-val green" id="r_bersih">Rp 27.226</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">C. Biaya Total &amp; Margin</div>
+    <div class="card-body">
+      <div class="result-row">
+        <span class="result-label">Modal (Harga Beli)</span>
+        <span class="result-val" id="r_modal2">Rp 25.000</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Biaya Variabel</span>
+        <span class="result-val" id="r_var2">Rp 2.000</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Biaya Tetap</span>
+        <span class="result-val" id="r_tetap2">Rp 1.000</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Total Biaya</span>
+        <span class="result-val red" id="r_total_biaya">Rp 28.000</span>
+      </div>
+      <div class="section-divider"></div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Laba Bersih</span>
+        <span class="result-val" id="r_laba">Rp −774</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Margin (%)</span>
+        <span class="result-val" id="r_margin">−2,21%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="metric">
+      <label>Harga Jual</label>
+      <span id="s_jual">Rp 35.000</span>
+    </div>
+    <div class="metric">
+      <label>Pendapatan Bersih</label>
+      <span id="s_bersih">Rp 27.226</span>
+    </div>
+    <div class="metric profit" id="s_laba_card">
+      <label>Laba Bersih</label>
+      <span id="s_laba">Rp −774</span>
+    </div>
+    <div class="metric profit" id="s_margin_card">
+      <label>Margin</label>
+      <span id="s_margin">−2,21%</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════ PANEL 2 ═══════════════════════ -->
+<div id="panel-target" class="panel">
+
+  <div class="card">
+    <div class="card-head">A. Input</div>
+    <div class="card-body">
+      <div class="field-row">
+        <span class="field-label">Harga Beli Barang (Modal)</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="t_modal" value="25000" min="0" oninput="calcTarget()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Admin</span>
+        <div class="field-input">
+          <input type="number" id="t_admin" value="18.25" min="0" max="100" step="0.01" oninput="calcTarget()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Proses Pesanan</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="t_proses" value="1250" min="0" oninput="calcTarget()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Pajak</span>
+        <div class="field-input">
+          <input type="number" id="t_pajak" value="0.5" min="0" max="100" step="0.01" oninput="calcTarget()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Variabel</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="t_var" value="2000" min="0" oninput="calcTarget()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label">Biaya Tetap</span>
+        <div class="field-input">
+          <span class="prefix">Rp</span>
+          <input type="number" id="t_tetap" value="1000" min="0" oninput="calcTarget()">
+        </div>
+      </div>
+      <div class="field-row">
+        <span class="field-label bold">🎯 Target Margin</span>
+        <div class="field-input">
+          <input type="number" id="t_margin" value="10" min="0" max="100" step="0.1" oninput="calcTarget()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">B. Harga Jual yang Harus Ditetapkan</div>
+    <div class="card-body">
+
+      <div style="text-align:center; padding: 1.2rem 0 1rem;">
+        <div style="font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--navy); margin-bottom:8px;">Harga Jual Target</div>
+        <div id="t_result_big" style="font-size:2.5rem; font-weight:900; color:var(--navy); letter-spacing:-0.03em;">Rp 42.597</div>
+      </div>
+
+      <div class="info-box">
+        <strong>Formula:</strong> HJ = (Biaya Proses × (1 − Pajak) + Total Biaya) ÷ ((1 − Admin) × (1 − Pajak) − Margin Target)
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">C. Verifikasi Kalkulasi</div>
+    <div class="card-body">
+      <div class="result-row">
+        <span class="result-label">Harga Jual</span>
+        <span class="result-val navy" id="v_jual">Rp 42.597</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">(−) Biaya Admin</span>
+        <span class="result-val red" id="v_admin">−Rp 7.774</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Setelah Admin</span>
+        <span class="result-val navy" id="v_after_admin">Rp 34.823</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">(−) Biaya Proses</span>
+        <span class="result-val red" id="v_proses">−Rp 1.250</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Setelah Proses</span>
+        <span class="result-val navy" id="v_after_proses">Rp 33.573</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">(−) Pajak</span>
+        <span class="result-val red" id="v_pajak">−Rp 168</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Pendapatan Bersih</span>
+        <span class="result-val green" id="v_bersih">Rp 33.405</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">(−) Total Biaya</span>
+        <span class="result-val red" id="v_total_biaya">−Rp 28.000</span>
+      </div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Laba Bersih</span>
+        <span class="result-val green" id="v_laba">Rp 5.405</span>
+      </div>
+      <div class="section-divider"></div>
+      <div class="result-row highlight">
+        <span class="result-label bold">Margin Aktual</span>
+        <span class="result-val green" id="v_margin_aktual">10,00%</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Selisih vs Target</span>
+        <span class="result-val" id="v_selisih">0,00%</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- .main -->
+
+<script>
+const fmt = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+const fmtPct = v => v.toFixed(2).replace('.', ',') + '%';
+const fmtPctInput = v => (v*100).toFixed(2).replace('.', ',') + '%';
+
+function calcAnalisis() {
+  const modal  = +document.getElementById('a_modal').value  || 0;
+  const jual   = +document.getElementById('a_jual').value   || 0;
+  const admin  = (+document.getElementById('a_admin').value || 0) / 100;
+  const proses = +document.getElementById('a_proses').value || 0;
+  const pajak  = (+document.getElementById('a_pajak').value || 0) / 100;
+  const varB   = +document.getElementById('a_var').value    || 0;
+  const tetap  = +document.getElementById('a_tetap').value  || 0;
+
+  const adminNom      = jual * admin;
+  const afterAdmin    = jual - adminNom;
+  const afterProses   = afterAdmin - proses;
+  const pajakNom      = afterProses * pajak;
+  const bersih        = afterProses - pajakNom;
+  const totalBiaya    = modal + varB + tetap;
+  const laba          = bersih - totalBiaya;
+  const margin        = jual > 0 ? (laba / jual) * 100 : 0;
+
+  set('r_jual',       fmt(jual));
+  set('r_admin_pct',  fmtPct(admin*100));
+  set('r_admin_nom',  '−' + fmt(adminNom));
+  set('r_after_admin',fmt(afterAdmin));
+  set('r_proses_nom', '−' + fmt(proses));
+  set('r_after_proses', fmt(afterProses));
+  set('r_pajak_pct',  fmtPct(pajak*100));
+  set('r_pajak_nom',  '−' + fmt(pajakNom));
+  set('r_bersih',     fmt(bersih));
+  set('r_modal2',     fmt(modal));
+  set('r_var2',       fmt(varB));
+  set('r_tetap2',     fmt(tetap));
+  set('r_total_biaya',fmt(totalBiaya));
+
+  const labaEl = document.getElementById('r_laba');
+  labaEl.textContent = (laba < 0 ? '−' : '') + fmt(Math.abs(laba));
+  labaEl.className = 'result-val ' + (laba >= 0 ? 'green' : 'red');
+
+  const marginEl = document.getElementById('r_margin');
+  marginEl.textContent = (margin < 0 ? '' : '') + fmtPct(margin);
+  marginEl.className = 'result-val ' + (margin >= 0 ? 'green' : 'red');
+
+  set('s_jual',   fmt(jual));
+  set('s_bersih', fmt(bersih));
+  const sLaba = document.getElementById('s_laba');
+  sLaba.textContent = (laba < 0 ? '−' : '') + fmt(Math.abs(laba));
+  const sMargin = document.getElementById('s_margin');
+  sMargin.textContent = fmtPct(margin);
+  const sLabaCard = document.getElementById('s_laba_card');
+  const sMarginCard = document.getElementById('s_margin_card');
+  if(laba < 0) {
+    sLabaCard.style.background = '#fde8e8';
+    sLaba.style.color = '#c0392b';
+    sMarginCard.style.background = '#fde8e8';
+    sMargin.style.color = '#c0392b';
+  } else {
+    sLabaCard.style.background = '';
+    sLaba.style.color = '';
+    sMarginCard.style.background = '';
+    sMargin.style.color = '';
+  }
+}
+
+function calcTarget() {
+  const modal  = +document.getElementById('t_modal').value  || 0;
+  const admin  = (+document.getElementById('t_admin').value || 0) / 100;
+  const proses = +document.getElementById('t_proses').value || 0;
+  const pajak  = (+document.getElementById('t_pajak').value || 0) / 100;
+  const varB   = +document.getElementById('t_var').value    || 0;
+  const tetap  = +document.getElementById('t_tetap').value  || 0;
+  const mg     = (+document.getElementById('t_margin').value || 0) / 100;
+
+  const totalBiaya = modal + varB + tetap;
+  const denominator = (1 - admin) * (1 - pajak) - mg;
+
+  if(denominator <= 0) {
+    set('t_result_big', 'Tidak valid');
+    return;
+  }
+
+  const hj = (proses * (1 - pajak) + totalBiaya) / denominator;
+
+  set('t_result_big', fmt(hj));
+
+  const adminNom    = hj * admin;
+  const afterAdmin  = hj - adminNom;
+  const afterProses = afterAdmin - proses;
+  const pajakNom    = afterProses * pajak;
+  const bersih      = afterProses - pajakNom;
+  const laba        = bersih - totalBiaya;
+  const marginAktual = hj > 0 ? (laba / hj) * 100 : 0;
+  const selisih     = marginAktual - mg * 100;
+
+  set('v_jual',          fmt(hj));
+  set('v_admin',         '−' + fmt(adminNom));
+  set('v_after_admin',   fmt(afterAdmin));
+  set('v_proses',        '−' + fmt(proses));
+  set('v_after_proses',  fmt(afterProses));
+  set('v_pajak',         '−' + fmt(pajakNom));
+  set('v_bersih',        fmt(bersih));
+  set('v_total_biaya',   '−' + fmt(totalBiaya));
+  set('v_laba',          fmt(laba));
+  set('v_margin_aktual', fmtPct(marginAktual));
+  const sel = document.getElementById('v_selisih');
+  sel.textContent = fmtPct(Math.abs(selisih));
+  sel.className = 'result-val ' + (Math.abs(selisih) < 0.01 ? 'green' : 'red');
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if(el) el.textContent = val;
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+calcAnalisis();
+calcTarget();
+</script>
+</body>
+</html>
